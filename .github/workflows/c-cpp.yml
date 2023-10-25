@@ -4,22 +4,51 @@
 #include <string>
 using namespace std;
 
+Class lecture{ 
+
+Public: 
+
+String name;	// 강의명 
+
+String num;	// 강의 번호 
+
+Vector<struct weekday>;	// 해당 강의 정보 ( 요일, 강의실, 시간 ) 
+
+String professor_id;	// 교강사 id(교강사 이름과 대응 
+
+} 
+
+Vector<lecture> all_classes_list; 
+
 void all_class_integrity(string class_file) {
     fstream newfile;
     string tp;
     newfile.open(class_file, ios::in);
     while (getline(newfile, tp)) {
-        cout << tp;
+        //문법 맞는 지 확인
+
+        //수업의 내용 lecture에 저장 후 수업을 all_classes_list에 저장
+
+        //만약 중복되는 강의번호 있으면 치명적 오류와 함께 종료
     }
 }
-void time_table_integrity() {
+void time_table_integrity(string time_file) {
+    fstream newfile;
+    string tp;
+    newfile.open(time_file, ios::in);
+    while (getline(newfile, tp)) {
+        //문법 맞는 지 확인
 
+        //classes.txt에 없는 강의번호면 종료
+
+        //is_addable() 사용
+    }
 }
 void professor_list_integrity() {
-
+    //all_classes_list 강사 교번으로 정렬 후 시간 중복되는 지 확인
 }
 void classroom_list_integrity() {
-
+    //all_classes_list 강의실로 정렬 후 시간 중복 확인
 }
 void check_file() {
     ifstream lect("classes.txt"); //수업 파일 있는지 확인
@@ -29,7 +58,7 @@ void check_file() {
         ofstream class_file("classes.txt"); //없으면 생성
     }
     all_class_integrity("classes.txt");
-    time_table_integrity();
+    time_table_integrity("time.txt);
     professor_list_integrity();
     classroom_list_integrity();
 }
