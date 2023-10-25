@@ -1,0 +1,49 @@
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+using namespace std;
+
+void check_file() {
+    ifstream lect("classes.txt"); //수업 파일 있는지 확인
+    ifstream lect2("time.txt");
+    if (!lect) {
+        cout << "classes.txt doesn't exist. Creating" << endl;
+        ofstream class_file("classes.txt"); //없으면 생성
+    }
+}
+void all_class_integrity() {
+
+}
+void time_table_integrity() {
+
+}
+void professor_list_integrity() {
+
+}
+void classroom_list_integrity() {
+
+}
+int menu() {
+    int a;
+    while (1) {
+        cout << "Choose from menu?";
+        cin >> a;
+        if (a == 0 || a == 1 || a == 2)
+            return a;
+    }
+}
+
+int main()
+{
+    check_file();
+    all_class_integrity();
+    time_table_integrity();
+    professor_list_integrity();
+    classroom_list_integrity();
+    while (1) {
+        int a = menu();
+        if (a == 0) break;
+    }
+
+    return 0;
+}
