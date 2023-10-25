@@ -1,18 +1,16 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <string>
 using namespace std;
 
-void check_file() {
-    ifstream lect("classes.txt"); //수업 파일 있는지 확인
-    ifstream lect2("time.txt");
-    if (!lect) {
-        cout << "classes.txt doesn't exist. Creating" << endl;
-        ofstream class_file("classes.txt"); //없으면 생성
+void all_class_integrity(string class_file) {
+    fstream newfile;
+    string tp;
+    newfile.open(class_file, ios::in);
+    while (getline(newfile, tp)) {
+        cout << tp;
     }
-}
-void all_class_integrity() {
-
 }
 void time_table_integrity() {
 
@@ -22,6 +20,18 @@ void professor_list_integrity() {
 }
 void classroom_list_integrity() {
 
+}
+void check_file() {
+    ifstream lect("classes.txt"); //수업 파일 있는지 확인
+    ifstream lect2("time.txt");
+    if (!lect) {
+        cout << "classes.txt doesn't exist. Creating" << endl;
+        ofstream class_file("classes.txt"); //없으면 생성
+    }
+    all_class_integrity("classes.txt");
+    time_table_integrity();
+    professor_list_integrity();
+    classroom_list_integrity();
 }
 int menu() {
     int a;
@@ -36,10 +46,6 @@ int menu() {
 int main()
 {
     check_file();
-    all_class_integrity();
-    time_table_integrity();
-    professor_list_integrity();
-    classroom_list_integrity();
     while (1) {
         int a = menu();
         if (a == 0) break;
