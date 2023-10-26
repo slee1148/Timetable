@@ -20,10 +20,10 @@ String professor_id;	// 교강사 id(교강사 이름과 대응
 
 Vector<lecture> all_classes_list; 
 
-void all_class_integrity(string class_file) {
+void all_class_integrity() {
     fstream newfile;
     string tp;
-    newfile.open(class_file, ios::in);
+    newfile.open("classes.txt");
     while (getline(newfile, tp)) {
         //문법 맞는 지 확인
 
@@ -32,10 +32,10 @@ void all_class_integrity(string class_file) {
         //만약 중복되는 강의번호 있으면 치명적 오류와 함께 종료
     }
 }
-void time_table_integrity(string time_file) {
+void time_table_integrity() {
     fstream newfile;
     string tp;
-    newfile.open(time_file, ios::in);
+    newfile.open("time.txt");
     while (getline(newfile, tp)) {
         //문법 맞는 지 확인
 
@@ -57,8 +57,8 @@ void check_file() {
         cout << "classes.txt doesn't exist. Creating" << endl;
         ofstream class_file("classes.txt"); //없으면 생성
     }
-    all_class_integrity("classes.txt");
-    time_table_integrity("time.txt);
+    all_class_integrity();
+    time_table_integrity();
     professor_list_integrity();
     classroom_list_integrity();
 }
