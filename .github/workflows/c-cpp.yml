@@ -2,6 +2,7 @@
 #include <fstream>
 #include <filesystem>
 #include <string>
+#include <sstream>
 using namespace std;
 
 Class lecture{ 
@@ -20,16 +21,18 @@ String professor_id;	// 교강사 id(교강사 이름과 대응
 
 Vector<lecture> all_classes_list; 
 
+
 void all_class_integrity() {
     fstream newfile;
     string tp;
     newfile.open("classes.txt");
     while (getline(newfile, tp)) {
-        //문법 맞는 지 확인
-
-        //수업의 내용 lecture에 저장 후 수업을 all_classes_list에 저장
-
-        //만약 중복되는 강의번호 있으면 치명적 오류와 함께 종료
+        string num;
+        istringstream ss(tp);
+        while (getline(ss, num, '\t')) {
+            if (check_time(num) == -1)
+                abort();
+        }
     }
 }
 void time_table_integrity() {
