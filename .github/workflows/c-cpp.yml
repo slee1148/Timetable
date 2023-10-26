@@ -29,9 +29,22 @@ void all_class_integrity() {
     while (getline(newfile, tp)) {
         string num;
         istringstream ss(tp);
+        int a = 0;
         while (getline(ss, num, '\t')) {
-            if (check_time(num) == -1)
-                abort();
+            switch (a) {
+            case 0:
+                if (check_time(num) == -1)
+                    abort();
+                else
+                    //집어넣기
+                break;
+            case 1:
+                if (check_name(num) == -1)
+                    abort();
+                break;
+
+            }
+            a++;
         }
     }
 }
