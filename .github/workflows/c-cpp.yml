@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <regex>
 using namespace std;
 
 enum Day { MON, TUE, WED, THU, FRI };
@@ -27,6 +28,26 @@ public:
 
 vector<Lecture> all_classes_list;
 
+int check_num(string num) {
+    regex re("\\d{4}$");
+    if (num.length() != 4) {
+        return -1;
+    }
+    if (regex_match(num, re)) {
+        return 0;
+    }
+    return -2;
+}
+int check_name(string name) {
+    regex re("^[A-Z][a-z]+( [A-Z][a-z]+){0,2}$");
+    if (regex_match(name, re)) {
+        return 0;
+    }
+    else {
+        return -1;
+    }
+}
+
 void all_class_integrity() {
     fstream newfile;
     string classes;
@@ -38,9 +59,15 @@ void all_class_integrity() {
         Lecture test;
         while (getline(ss, num, '\t')) {
             if (a == 0) {
+                if (check_num(num) != 0)
+                    cout << classes;
+                    abort();
                 test.num = num;
             }
             else if (a == 1) {
+                if (check_name(num) == -1)
+                    cout << classes;
+                    abort();
                 test.name = num;
             }
             else if (a == 2) {
