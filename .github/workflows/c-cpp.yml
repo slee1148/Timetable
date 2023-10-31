@@ -3,98 +3,177 @@
 #include <filesystem>
 #include <string>
 #include <sstream>
+#include <vector>
 using namespace std;
 
-Class lecture{ 
+enum Day { MON, TUE, WED, THU, FRI };
 
-Public: 
+typedef struct TimePlace {
+    Day day;
+    string classroom;
+    string time;
+} tp;
 
-String name;	// 강의명 
+class Lecture {
+public:
+    string name;
+    string num;
+    string professor_id;
+    vector<tp> tp_list;
 
-String num;	// 강의 번호 
+    bool operator<(Lecture rhs) { return num < rhs.num; }
+    bool operator==(Lecture rhs) { return num == rhs.num; }
+};
 
-Vector<struct weekday>;	// 해당 강의 정보 ( 요일, 강의실, 시간 ) 
-
-String professor_id;	// 교강사 id(교강사 이름과 대응 
-
-} 
-
-Vector<lecture> all_classes_list; 
-
+vector<Lecture> all_classes_list;
 
 void all_class_integrity() {
     fstream newfile;
-    string tp;
+    string classes;
     newfile.open("classes.txt");
-    while (getline(newfile, tp)) {
+    while (getline(newfile, classes)) {
         string num;
-        istringstream ss(tp);
+        istringstream ss(classes);
         int a = 0;
+        Lecture test;
         while (getline(ss, num, '\t')) {
-            switch (a) {
-            case 0:
-                if (check_time(num) == -1)
-                    abort();
-                else
-                    //집어넣기
-                break;
-            case 1:
-                if (check_name(num) == -1)
-                    abort();
-                break;
-
+            if (a == 0) {
+                test.num = num;
+            }
+            else if (a == 1) {
+                test.name = num;
+            }
+            else if (a == 2) {
+                string dt;
+                istringstream daytime(num);
+                int b = 0;
+                vector<tp> dtl;
+                tp thatday;
+                while (getline(daytime, dt, ' ')) {
+                    int c;
+                    switch (b % 2) {
+                    case 0:
+                        c = dt.at(0) - '1';
+                        switch (c) {
+                        case 0:
+                            thatday.day = MON;
+                            break;
+                        case 1:
+                            thatday.day = TUE;
+                            break;
+                        case 2:
+                            thatday.day = WED;
+                            break;
+                        case 3:
+                            thatday.day = THU;
+                            break;
+                        case 4:
+                            thatday.day = FRI;
+                            break;
+                        }
+                        dt.erase(0, 1);
+                        thatday.time = dt;
+                        break;
+                    case 1:
+                        thatday.classroom = dt;
+                        dtl.push_back(thatday);
+                        break;
+                    }
+                    b++;
+                }
+                test.tp_list = dtl;
+            }
+            else if (a == 3) {
+                test.professor_id = num;
             }
             a++;
         }
+        all_classes_list.push_back(test);
     }
 }
 void time_table_integrity() {
     fstream newfile;
-    string tp;
-    newfile.open("time.txt");
-    while (getline(newfile, tp)) {
-        //문법 맞는 지 확인
+    string classes;
+    newfile.open("classes.txt");
+    while (getline(newfile, classes)) {
+        string num;
+        istringstream ss(classes);
+        while (getline(ss, num, '\t')) {
 
-        //classes.txt에 없는 강의번호면 종료
-
-        //is_addable() 사용
+        }
     }
 }
 void professor_list_integrity() {
-    //all_classes_list 강사 교번으로 정렬 후 시간 중복되는 지 확인
+    fstream newfile;
+    string classes;
+    newfile.open("professor.txt");
+    while (getline(newfile, classes)) {
+        string num;
+        istringstream ss(classes);
+        while (getline(ss, num, '\t')) {
+            
+        }
+    }
 }
 void classroom_list_integrity() {
-    //all_classes_list 강의실로 정렬 후 시간 중복 확인
+    fstream newfile;
+    string classes;
+    newfile.open("classroom.txt");
+    while (getline(newfile, classes)) {
+        string num;
+        istringstream ss(classes);
+    }
 }
 void check_file() {
-    ifstream lect("classes.txt"); //수업 파일 있는지 확인
+    ifstream lect("classes.txt");
     ifstream lect2("time.txt");
+    ifstream lect3("professor.txt");
+    ifstream lect4("classroom.txt");
     if (!lect) {
         cout << "classes.txt doesn't exist. Creating" << endl;
-        ofstream class_file("classes.txt"); //없으면 생성
+        ofstream class_file("classes.txt");
     }
-    all_class_integrity();
-    time_table_integrity();
-    professor_list_integrity();
-    classroom_list_integrity();
-}
-int menu() {
-    int a;
-    while (1) {
-        cout << "Choose from menu?";
-        cin >> a;
-        if (a == 0 || a == 1 || a == 2)
-            return a;
+    else {
+        all_class_integrity();
+    }
+    if (!lect2) {
+        cout << "time.txt doesn't exist. Creating" << endl;
+        ofstream class_file("time.txt");
+    }
+    else {
+        time_table_integrity();
+    }
+    if (!lect3) {
+        cout << "professor.txt doesn't exist. Creating" << endl;
+        ofstream class_file("professor.txt");
+    }
+    else {
+        professor_list_integrity();
+    }
+    if (!lect4) {
+        cout << "classroom.txt doesn't exist. Creating" << endl;
+        ofstream class_file("classroom.txt");
+    }
+    else {
+        classroom_list_integrity();
     }
 }
+
 
 int main()
 {
     check_file();
-    while (1) {
-        int a = menu();
-        if (a == 0) break;
+    for (int i = 0; i < all_classes_list.size(); i++) {
+        cout << all_classes_list.at(i).num << "\t";
+        cout << all_classes_list.at(i).name << "\t";
+        for (int j = 0; j < all_classes_list.at(i).tp_list.size(); j++) {
+            cout << all_classes_list.at(i).tp_list.at(j).day << " ";
+            cout << all_classes_list.at(i).tp_list.at(j).time << " ";
+            cout << all_classes_list.at(i).tp_list.at(j).classroom << " ";
+        }
+        cout << "\t";
+        cout << all_classes_list.at(i).professor_id << "\t";
+        cout << endl;
     }
-
     return 0;
 }
