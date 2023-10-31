@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <regex>
+#include <set>
 using namespace std;
 
 enum Day { MON, TUE, WED, THU, FRI };
@@ -47,8 +48,22 @@ int check_name(string name) {
         return -1;
     }
 }
+int check_time(string time) {
+    regex re("[0-4]((0[1-9])|(1[0-8])){2}$");
+
+    if (regex_match(time, re)) {
+        string sub1, sub2;
+        sub1 = time.substr(1, 2);
+        sub2 = time.substr(3, 4);
+        if (sub1 >= sub2) return -1;
+        else
+            return 0;
+    }
+    return -1;
+}
 
 void all_class_integrity() {
+    bool is_fuckedup = false;
     fstream newfile;
     string classes;
     newfile.open("classes.txt");
@@ -56,19 +71,25 @@ void all_class_integrity() {
         string num;
         istringstream ss(classes);
         int a = 0;
-        Lecture test;
+        Lecture all_classes;
         while (getline(ss, num, '\t')) {
             if (a == 0) {
-                if (check_num(num) != 0)
-                    cout << classes;
-                    abort();
-                test.num = num;
+                for (int i = 0; i < all_classes_list.size(); i++) {
+                    if (num == all_classes_list.at(i).num || check_num(num) != 0) {
+                        cout << classes << endl;
+                        is_fuckedup = true;
+                        break;
+                    }
+                }
+                all_classes.num = num;
             }
             else if (a == 1) {
-                if (check_name(num) == -1)
-                    cout << classes;
-                    abort();
-                test.name = num;
+                if (check_name(num) == -1) {
+                    cout << classes << endl;
+                    is_fuckedup = true;
+                    break;
+                }
+                all_classes.name = num;
             }
             else if (a == 2) {
                 string dt;
@@ -80,6 +101,11 @@ void all_class_integrity() {
                     int c;
                     switch (b % 2) {
                     case 0:
+                        if (check_time(dt) == -1) {
+                            cout << classes << endl;
+                            is_fuckedup = true;
+                            break;
+                        }
                         c = dt.at(0) - '1';
                         switch (c) {
                         case 0:
@@ -102,53 +128,123 @@ void all_class_integrity() {
                         thatday.time = dt;
                         break;
                     case 1:
+                        if (check_num(dt) != 0) {
+                            cout << classes <<endl;
+                            is_fuckedup = true;
+                            break;
+                        }
                         thatday.classroom = dt;
                         dtl.push_back(thatday);
                         break;
                     }
                     b++;
                 }
-                test.tp_list = dtl;
+                all_classes.tp_list = dtl;
             }
             else if (a == 3) {
-                test.professor_id = num;
+                if (check_num(num) != 0) {
+                    cout << classes << endl;
+                    is_fuckedup = true;
+                }
+                all_classes.professor_id = num;
             }
             a++;
         }
-        all_classes_list.push_back(test);
+        all_classes_list.push_back(all_classes);
+    }
+    if (is_fuckedup == true) {
+        abort();
     }
 }
 void time_table_integrity() {
     fstream newfile;
     string classes;
     newfile.open("classes.txt");
+    bool is_fuckedup = false;
     while (getline(newfile, classes)) {
         string num;
         istringstream ss(classes);
+        int a = 0;
+        vector<string> time_name;
         while (getline(ss, num, '\t')) {
-
+            if (a == 0) {
+                for (int i = 0; i < time_name.size(); i++) {
+                    if (num == time_name.at(i) || check_name(num) == -1) {
+                        cout << classes << endl;
+                        is_fuckedup = true;
+                        break;
+                    }
+                }
+                time_name.push_back(num);
+            }
+            else {
+                bool exist = false;
+                for (int i = 0; i < all_classes_list.size(); i++) {
+                    if (all_classes_list.at(i).num == num) {
+                        exist = true;
+                    }
+                }
+                if (exist == false) {
+                    cout << classes << endl;
+                    is_fuckedup = true;
+                    break;
+                }
+            }
         }
+    }
+    if (is_fuckedup == true) {
+        abort();
     }
 }
 void professor_list_integrity() {
     fstream newfile;
     string classes;
     newfile.open("professor.txt");
+    vector<string> prof;
+    bool is_fuckedup = false;
     while (getline(newfile, classes)) {
         string num;
         istringstream ss(classes);
+        int a = 0;
         while (getline(ss, num, '\t')) {
-            
+            if (a == 0) {
+                if (check_num(num) != 0) {
+                    cout << num << endl;
+                    is_fuckedup = true;
+                }
+                prof.push_back(num);
+            }
+            if (a == 1) {
+                if (check_name(num) == -1) {
+                    cout << num << endl;
+                    is_fuckedup = true;
+                }
+            }
+            else
+                is_fuckedup = true;
         }
+    }
+    set<string> proflist(prof.begin(), prof.end());
+    if (proflist.size() < prof.size() || is_fuckedup == true) {
+        abort();
     }
 }
 void classroom_list_integrity() {
     fstream newfile;
     string classes;
+    vector<string> room;
+    bool is_fuckedup = false;
     newfile.open("classroom.txt");
     while (getline(newfile, classes)) {
-        string num;
-        istringstream ss(classes);
+        if (check_num(classes) != 0) {
+            cout << classes << endl;
+            is_fuckedup = true;
+        }
+        room.push_back(classes);
+    }
+    set<string> roomlist(room.begin(), room.end());
+    if (roomlist.size() < room.size() || is_fuckedup == true) {
+        abort();
     }
 }
 void check_file() {
