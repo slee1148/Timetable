@@ -1,0 +1,343 @@
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <regex>
+#include <set>
+using namespace std;
+
+enum Day { MON, TUE, WED, THU, FRI };
+
+typedef struct TimePlace {
+    Day day;
+    string classroom;
+    string time;
+} tp;
+//강의 시간 및 공간
+
+class Lecture {
+public:
+    string name;
+    string num;
+    string professor_id;
+    vector<tp> tp_list;
+
+    bool operator<(Lecture rhs) { return num < rhs.num; }
+    bool operator==(Lecture rhs) { return num == rhs.num; }
+};
+//강의 정보
+
+vector<Lecture> all_classes_list; //강의 저장
+vector<string> professor; //교수 저장
+vector<string> classrooms; //강의실 저장
+
+int check_num(string num) {
+    regex re("\\d{4}$");
+    if (num.length() != 4) {
+        return -1;
+    }
+    if (regex_match(num, re)) {
+        return 0;
+    }
+    return -2;
+}
+//번호 확인
+
+int check_name(string name) {
+    regex re("^[A-Z][a-z]+( [A-Z][a-z]+){0,2}$");
+    if (regex_match(name, re)) {
+        return 0;
+    }
+    else {
+        return -1;
+    }
+}
+//이름 확인
+
+int check_time(string time) {
+    regex re("[0-4]((0[1-9])|(1[0-8])){2}$");
+
+    if (regex_match(time, re)) {
+        string sub1, sub2;
+        sub1 = time.substr(1, 2);
+        sub2 = time.substr(3, 4);
+        if (sub1 >= sub2) return -1;
+        else
+            return 0;
+    }
+    return -1;
+}
+//시간 확인
+
+void all_class_integrity() {
+    bool file_is_fuckedup = false;
+    fstream newfile;
+    string classes;
+    newfile.open("classes.txt");
+    while (getline(newfile, classes)) {
+        bool is_fuckedup = false;
+        string num;
+        istringstream ss(classes);
+        int a = 0;
+        Lecture all_classes;
+        while (getline(ss, num, '\t')) {
+            if (a == 0) {
+                for (int i = 0; i < all_classes_list.size(); i++) {
+                    if (num == all_classes_list.at(i).num) {
+                        is_fuckedup = true;
+                        break;
+                    }
+                }
+                if (check_num(num) != 0) {
+                    is_fuckedup = true;
+                    break;
+                }
+                all_classes.num = num;
+            }
+            else if (a == 1) {
+                if (check_name(num) != 0) {
+                    is_fuckedup = true;
+                    break;
+                }
+                all_classes.name = num;
+            }
+            else if (a == 2) {
+                string dt;
+                istringstream daytime(num);
+                int b = 0;
+                vector<tp> dtl;
+                tp thatday;
+                while (getline(daytime, dt, ' ')) {
+                    bool exists = false;
+                    int c;
+                    switch (b % 2) {
+                    case 0:
+                        if (check_time(dt) != 0) {
+                            is_fuckedup = true;
+                            break;
+                        }
+                        c = dt.at(0) - '1';
+                        switch (c) {
+                        case 0:
+                            thatday.day = MON;
+                            break;
+                        case 1:
+                            thatday.day = TUE;
+                            break;
+                        case 2:
+                            thatday.day = WED;
+                            break;
+                        case 3:
+                            thatday.day = THU;
+                            break;
+                        case 4:
+                            thatday.day = FRI;
+                            break;
+                        }
+                        dt.erase(0, 1);
+                        thatday.time = dt;
+                        break;
+                    case 1:
+                        for (int i = 0; i < classrooms.size(); i++) {
+                            if (classrooms.at(i) == dt) {
+                                exists = true;
+                            }
+                        }
+                        if (check_num(dt) != 0 || exists == false) {
+                            is_fuckedup = true;
+                            break;
+                        }
+                        thatday.classroom = dt;
+                        dtl.push_back(thatday);
+                        break;
+                    }
+                    b++;
+                }
+                all_classes.tp_list = dtl;
+            }
+            else if (a == 3) {
+                bool exist = false;
+                for (int i = 0; i < professor.size(); i++) {
+                    if (professor.at(i) == num) {
+                        exist = true;
+                    }
+                }
+                if (check_num(num) != 0 || exist == false) {
+                    is_fuckedup = true;
+                    break;
+                }
+                all_classes.professor_id = num;
+            }
+            a++;
+        }
+        if (is_fuckedup || a != 4) {
+            cout << classes << endl;
+            file_is_fuckedup = true;
+        }
+        all_classes_list.push_back(all_classes);
+    }
+    if (file_is_fuckedup) {
+        abort();
+    }
+}
+//강의표 무결성 검사
+
+
+void time_table_integrity() {
+    fstream newfile;
+    string classes;
+    newfile.open("time.txt");
+    bool file_is_fuckedup = false;
+    while (getline(newfile, classes)) {
+        string num;
+        istringstream ss(classes);
+        int a = 0;
+        vector<string> time_name;
+        bool is_fuckedup = false;
+        while (getline(ss, num, '\t')) {
+            if (a == 0) {
+                for (int i = 0; i < time_name.size(); i++) {
+                    if (num == time_name.at(i) || check_name(num) == -1) {
+                        is_fuckedup = true;
+                        break;
+                    }
+                }
+                time_name.push_back(num);
+            }
+            else {
+                bool exist = false;
+                for (int i = 0; i < all_classes_list.size(); i++) {
+                    if (all_classes_list.at(i).num == num) {
+                        exist = true;
+                    }
+                }
+                if (exist == false) {
+                    is_fuckedup = true;
+                    break;
+                }
+            }
+        }
+        if (is_fuckedup) {
+            cout << classes << endl;
+            file_is_fuckedup = true;
+        }
+    }
+    if (file_is_fuckedup == true) {
+        abort();
+    }
+}
+//시간표 무결성 검사
+
+void professor_list_integrity() {
+    bool file_is_fuckedup = false;
+    fstream newfile;
+    string classes;
+    newfile.open("professor.txt");
+    while (getline(newfile, classes)) {
+        bool is_fuckedup = false;
+        string num;
+        istringstream ss(classes);
+        int a = 0;
+        while (getline(ss, num, '\t')) {
+            if (a == 0) {
+                if (check_num(num) != 0) {
+                    is_fuckedup = true;
+                }
+                professor.push_back(num);
+            }
+            else if (a == 1) {
+                if (check_name(num) == -1) {
+                    is_fuckedup = true;
+                }
+            }
+            else {
+                is_fuckedup = true;
+            }
+            a++;
+        }
+        if (is_fuckedup) {
+            cout << classes << endl;
+            file_is_fuckedup == true;
+        }
+    }
+    set<string> proflist(professor.begin(), professor.end());
+    if (proflist.size() < professor.size() || file_is_fuckedup == true) {
+        abort();
+    }
+}
+//교수 무결성 검사
+
+void classroom_list_integrity() {
+    fstream newfile;
+    string classes;
+    bool is_fuckedup = false;
+    newfile.open("classroom.txt");
+    while (getline(newfile, classes)) {
+        if (check_num(classes) != 0) {
+            cout << classes << endl;
+            is_fuckedup = true;
+        }
+        classrooms.push_back(classes);
+    }
+    set<string> roomlist(classrooms.begin(), classrooms.end());
+    if (roomlist.size() < classrooms.size() || is_fuckedup == true) {
+        abort();
+    }
+}
+//강의실 무결성 검사
+
+void check_file() {
+    ifstream lect("professor.txt");
+    ifstream lect2("classroom.txt");
+    ifstream lect3("classes.txt");
+    ifstream lect4("time.txt");
+    bool exist = true;
+    if (!lect) {
+        cout << "경고: 홈 경로 .\Timetable에 데이터 파일이 없습니다." << endl;
+        cout << "홈 경로에 빈 데이터 파일을 새로 생성했습니다:" << endl;
+        cout << ".\Timetable\professor.txt" << endl;
+        exist = false;
+        ofstream class_file("professor.txt");
+    }
+    else {
+        professor_list_integrity();
+    }
+    if (!lect2) {
+        if (!exist){
+            cout << "경고: 홈 경로 .\Timetable에 데이터 파일이 없습니다." << endl;
+            cout << "홈 경로에 빈 데이터 파일을 새로 생성했습니다:" << endl;
+            exist = false;
+        }
+        cout << ".\Timetable\classroom.txt" << endl;
+        ofstream class_file("classroom.txt");
+    }
+    else {
+        classroom_list_integrity();
+    }
+    if (!lect3) {
+        if (!exist){
+            cout << "경고: 홈 경로 .\Timetable에 데이터 파일이 없습니다." << endl;
+            cout << "홈 경로에 빈 데이터 파일을 새로 생성했습니다:" << endl;
+            exist = false;
+        }
+        cout << ".\Timetable\classes.txt" << endl;
+        ofstream class_file("classes.txt");
+    }
+    else {
+        all_class_integrity();
+    }
+    if (!lect4) {
+        if (!exist){
+            cout << "경고: 홈 경로 .\Timetable에 데이터 파일이 없습니다." << endl;
+            cout << "홈 경로에 빈 데이터 파일을 새로 생성했습니다:" << endl;
+            exist = false;
+        }
+        cout << ".\Timetable\time.txt" << endl;
+        ofstream class_file("time.txt");
+    }
+    else {
+        time_table_integrity();
+    }
+}
