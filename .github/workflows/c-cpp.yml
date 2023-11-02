@@ -172,6 +172,9 @@ void all_class_integrity() {
     string classes;
     newfile.open("C:\\Timetable\\allclasses.txt");
     while (getline(newfile, classes)) {
+        if(classes = ""){
+            file_is_fuckedup = true;
+        }
         bool is_fuckedup = false;
         string num;
         istringstream ss(classes);
@@ -295,6 +298,9 @@ void time_table_integrity() {
     newfile.open("C:\\Timetable\\timetables.txt");
     bool file_is_fuckedup = false;
     while (getline(newfile, classes)) {
+        if(classes = ""){
+            file_is_fuckedup = true;
+        }
         string num;
         istringstream ss(classes);
         int a = 0;
@@ -350,6 +356,9 @@ void professor_list_integrity() {
     string classes;
     newfile.open("C:\\Timetable\\Professor_list.txt");
     while (getline(newfile, classes)) {
+        if(classes = ""){
+            file_is_fuckedup = true;
+        }
         bool is_fuckedup = false;
         string num;
         istringstream ss(classes);
@@ -387,6 +396,9 @@ void classroom_list_integrity() {
     bool is_fuckedup = false;
     newfile.open("C:\\Timetable\\Classroom_list.txt");
     while (getline(newfile, classes)) {
+        if(classes = ""){
+            is_fuckedup = true;
+        }
         if (check_num(classes) != 0) {
             cout << classes << endl;
             is_fuckedup = true;
