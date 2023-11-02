@@ -1,0 +1,109 @@
+
+//시간표에 추가 가능한가
+bool is_addable(vector<Lecture> temp, string selectedLectureIndex) {
+    if (temp.empty()) {
+        return true;
+    }
+    Lecture temp2;
+    for (int i = 0; i < all_classes_list.size(); i++) {
+        if (all_classes_list.at(i).num == selectedLectureIndex) {
+            temp2 = all_classes_list.at(i);
+        }
+    }
+    for (int i = 0; i < temp.size(); i++) {
+        Lecture temp3;
+        for (int j = 0; j < all_classes_list.size(); i++) {
+            if (temp.at(i).num == all_classes_list.at(j).num) {
+                temp3 = all_classes_list.at(j);
+            }
+        }
+        for (int j = 0; j < temp3.tp_list.size(); j++) {
+            for (int k = 0; k < temp2.tp_list.size(); k++) {
+                if (temp2.tp_list.at(k).day == temp3.tp_list.at(j).day) {
+                    int t2 = stoi(temp2.tp_list.at(k).time);
+                    int t3 = stoi(temp3.tp_list.at(j).time);
+                    int t22 = t2 / 100;
+                    t2 %= 100;
+                    int t33 = t3 / 100;
+                    t3 %= 100;
+                    if ((t33 >= t22 && t33 <= t2) || (t22 >= t33 && t22 <= t3)) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+//교수 시간이 안 겹치는가
+bool prof_is_addable(string prof, vector<tp> his_time) {
+    
+    vector<Lecture> lects;
+    for (int i = 0; i < all_classes_list.size(); i++) {
+        if (prof == all_classes_list.at(i).professor_id) {
+            Lecture temp = all_classes_list.at(i);
+            lects.push_back(temp);
+        }
+    }
+    for (int i = 0; i < lects.size(); i++) {
+        for (int j = 0; j < his_time.size(); j++) {
+            for (int k = 0; k < lects.at(i).tp_list.size(); k++) {
+                if (his_time.at(j).day == lects.at(i).tp_list.at(k).day) {
+                    int t2 = stoi(his_time.at(j).time);
+                    int t3 = stoi(lects.at(i).tp_list.at(k).time);
+                    int t22 = t2 / 100;
+                    t2 %= 100;
+                    int t33 = t3 / 100;
+                    t3 %= 100;
+                    if ((t33 >= t22 && t33 <= t2) || (t22 >= t33 && t22 <= t3)) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+//방이 안 겹치는가
+bool room_is_addable(tp time, string room) {
+
+    for (int i = 0; i < all_classes_list.size(); i++) {
+        for (int j = 0; j < all_classes_list.at(i).tp_list.size(); j++) {
+            if (all_classes_list.at(i).tp_list.at(j).classroom == room) {
+                if (all_classes_list.at(i).tp_list.at(j).day == time.day) {
+                    int t2 = stoi(all_classes_list.at(i).tp_list.at(j).time);
+                    int t3 = stoi(time.time);
+                    int t22 = t2 / 100;
+                    t2 %= 100;
+                    int t33 = t3 / 100;
+                    t3 %= 100;
+                    if ((t33 >= t22 && t33 <= t2) || (t22 >= t33 && t22 <= t3)) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+//한 수업이 동시에 진행되지 않는가
+bool is_expendable(vector<tp> ex, Day day, string time) {
+    for (int i = 0; i < ex.size(); i++) {
+        if (ex.at(i).day == day) {
+            int t2 = stoi(ex.at(i).time);
+            int t3 = stoi(time);
+            int t22 = t2 / 100;
+            t2 %= 100;
+            int t33 = t3 / 100;
+            t3 %= 100;
+            if ((t33 >= t22 && t33 <= t2) || (t22 >= t33 && t22 <= t3)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
